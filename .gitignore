@@ -1,0 +1,7 @@
+node_modules
+dist
+dist-server
+.vercel
+.env
+.vscode
+out
