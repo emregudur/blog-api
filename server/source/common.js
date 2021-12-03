@@ -24,11 +24,11 @@ export function validateEmail(email) {
 
 export function securePassCheck(password) {
   let regs = [
-    { 'reg': '(?=.*[a-z])', 'err': 'req.low.character' },
-    { 'reg': '(?=.*[A-Z])', 'err': 'req.upper.character' },
-    { 'reg': '(?=.*[0-9])', 'err': 'req.number' },
-    { 'reg': '(?=.*[!_?@#$%^&*+.,/-])', 'err': 'req.special.character' },
-    { 'reg': '(?=.{8,})', 'err': 'must.be.8.character' },
+    { 'reg': '(?=.*[a-z])', 'err': 'Required low character' },
+    { 'reg': '(?=.*[A-Z])', 'err': 'Required upper character' },
+    { 'reg': '(?=.*[0-9])', 'err': 'Required number' },
+    { 'reg': '(?=.*[!_?@#$%^&*+.,/-])', 'err': 'Required special character' },
+    { 'reg': '(?=.{8,})', 'err': 'Must be 8 character' },
   ]
 
   return regs
@@ -41,4 +41,10 @@ export function securePassCheck(password) {
 export const mongodbConnectionUri = () => {
   const { MONGO_USERNAME, MONGO_PASSWORD, MONGO_DBNAME, MONGO_PORT, MONGO_HOST } = process.env
   return `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DBNAME}?authSource=admin`
+}
+
+export const handleErrors = err => {
+  // TODO: save error
+  console.log(err)
+  return { status: false, message: "There's something wrong", err }
 }

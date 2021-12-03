@@ -4,8 +4,8 @@ const Router = express.Router()
 import * as PostController from '../controller/post'
 
 Router.get('/', PostController.Get)
-Router.get('/:page/page', PostController.Get)
-Router.get('/:id', PostController.Get)
+Router.get('/:page/page', PostController.GetPaginate)
+Router.get('/user/:userId', PostController.Get)
 
 Router.post('/add', PostController.Add)
 

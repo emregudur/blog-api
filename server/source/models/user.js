@@ -10,7 +10,6 @@ const UserModel = new Schema({
     type: String,
     unique: true,
     required: true,
-    uppercase: true,
   },
   password: {
     type: String,

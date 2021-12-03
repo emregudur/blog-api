@@ -67,15 +67,3 @@ export async function Verify(req, res, next) {
     next()
   })
 }
-
-export async function Refresh(req, res, next) {
-  let json = JSON.stringify({ 'test': true })
-
-  res.send(json)
-}
-
-export async function Delete(req, res, next) {
-  let json = JSON.stringify({ 'test': true })
-
-  res.send(json)
-}
