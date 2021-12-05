@@ -38,6 +38,7 @@ const PostModel = new Schema({
     type: Boolean,
     default: true,
   },
+  comments: Array,
 })
 
 export default mongoose.model('post', PostModel)

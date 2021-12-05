@@ -20,7 +20,7 @@ export async function register(req, res, next) {
   userModel
     .save()
     .then(json => {
-      res.send(json)
+      res.send({ status: true, message: 'Successful' })
     })
     .catch(err => res.status(500).json({ err }))
 }

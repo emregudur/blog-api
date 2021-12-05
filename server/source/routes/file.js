@@ -43,40 +43,18 @@ module.exports = upload => {
       category: req.body.category,
       fileId: generateUniqueId(),
       userId: req.user.userId,
+      dependentPostId: req.body.dependentPostId || '',
       ext: path.extname(req.file.filename).toUpperCase().replace(/./, ''),
     })
 
     newFile
       .save()
       .then(file => {
+        delete file._id
         res.status(200).json({
           success: true,
           file,
         })
-      })
-      .catch(err => res.status(500).json(err))
-  })
-
-  fileRouter.route('/delete/:id').get((req, res, next) => {
-    File.findOne({ _id: req.params.id })
-      .then(file => {
-        if (file) {
-          File.deleteOne({ _id: req.params.id })
-            .then(() => {
-              return res.status(200).json({
-                success: true,
-                message: `File with ID: ${req.params.id} deleted`,
-              })
-            })
-            .catch(err => {
-              return res.status(500).json(err)
-            })
-        } else {
-          res.status(200).json({
-            success: false,
-            message: `File with ID: ${req.params.id} not found`,
-          })
-        }
       })
       .catch(err => res.status(500).json(err))
   })
@@ -92,39 +70,15 @@ module.exports = upload => {
       .catch(err => res.status(500).json(err))
   })
 
-  fileRouter.route('/multiple').post(upload.array('file', 3), (req, res, next) => {
-    res.status(200).json({
-      success: true,
-      message: `${req.files.length} files uploaded successfully`,
-    })
-  })
+  // fileRouter.route('/multiple').post(upload.array('file', 3), (req, res, next) => {
+  //   res.status(200).json({
+  //     success: true,
+  //     message: `${req.files.length} files uploaded successfully`,
+  //   })
+  // })
 
-  fileRouter.route('/all').get((req, res, next) => {
-    gfs.find().toArray((err, files) => {
-      if (!files || files.length === 0) {
-        return res.status(200).json({
-          success: false,
-          message: 'No files available',
-        })
-      }
-
-      files.map(file => {
-        if (file.contentType === 'file/jpeg' || file.contentType === 'file/png' || file.contentType === 'file/svg') {
-          file.isFile = true
-        } else {
-          file.isFile = false
-        }
-      })
-
-      res.status(200).json({
-        success: true,
-        files,
-      })
-    })
-  })
-
-  fileRouter.route('/:filename').get((req, res, next) => {
-    gfs.find({ filename: req.params.filename }).toArray((err, files) => {
+  fileRouter.route('/:id').get((req, res, next) => {
+    gfs.find({ fileId: req.params.id }).toArray((err, files) => {
       if (!files[0] || files.length === 0) {
         return res.status(200).json({
           success: false,
@@ -136,8 +90,7 @@ module.exports = upload => {
     })
   })
 
-  fileRouter.route('/del/:id').post((req, res, next) => {
-    console.log(req.params.id)
+  fileRouter.route('/delete/:id').delete((req, res, next) => {
     gfs.delete(new mongoose.Types.ObjectId(req.params.id), (err, data) => {
       if (err) {
         return res.status(404).json({ err: err })

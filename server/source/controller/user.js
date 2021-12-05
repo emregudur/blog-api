@@ -2,11 +2,9 @@ import { handleErrors } from '../common'
 import User from '../models/user'
 
 export async function Get(req, res, next) {
-  const { userId } = req.body
+  const { id: userId } = req.params
   let user = await getUser(userId)
-  delete user._id
-
-  res.send(user)
+  res.status(200).send(user)
 }
 
 export async function Delete(req, res, next) {
@@ -23,6 +21,12 @@ export async function Delete(req, res, next) {
 
 export const getUser = async userId => {
   return await User.findOne({ userId })
-    .then(user => user)
+    .then(user => {
+      delete user._doc._id
+      delete user._doc.__v
+      delete user._doc.password
+      !user._doc.isAdmin ? delete user._doc.isAdmin : null
+      return user
+    })
     .catch(handleErrors)
 }

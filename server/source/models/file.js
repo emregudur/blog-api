@@ -17,6 +17,7 @@ const FileSchema = new Schema({
     required: true,
     type: String,
   },
+  dependentPostId: String,
   createdAt: {
     default: Date.now(),
     type: Date,
