@@ -1,14 +1,17 @@
 import mongoose from 'mongoose'
-import { mongodbConnectionUri } from './common'
+import { uri } from './common'
 
-export default function () {
-  console.log(mongodbConnectionUri())
-  mongoose
-    .connect(mongodbConnectionUri(), { useNewUrlParser: true, useUnifiedTopology: true })
-    .then(res => {
-      console.log('mongodb connected')
-    })
-    .catch(function (err) {
-      console.log(err)
-    })
+export default async function () {
+  return new Promise((resolve, reject) => {
+    mongoose
+      .connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+      .then(res => {
+        console.log('mongodb connected')
+        resolve(true)
+      })
+      .catch(function (err) {
+        console.log(err)
+        reject(err)
+      })
+  })
 }

@@ -1,54 +1,61 @@
-import { handleErrors } from '../common'
+import { generateUniqueId, handleErrors, upload } from '../common'
 import Post from '../models/post'
+import User from '../models/user'
+import { FileModelSave } from '../controller/file'
+
+const POST_LIMIT_SIZE = 4
 
 export async function Get(req, res, next) {
-  const { isAdmin, userId: authenticatedUserId } = req.user
-  const { userId, page } = req.params
-
-  if (isAdmin || req.user === undefined)
-    Post.find({})
-      .then(payload => {
-        let data = payload.map(x => delete x._id)
-        res.status(200).send(data)
+  Post.find({})
+    .populate('user')
+    .skip()
+    .limit(4)
+    .then(payload => {
+      let data = payload.map(async x => {
+        delete x._id
+        let usr = await User.findOne({ userId: x.userId })
+        return { data: x, user: usr }
       })
-      .catch(err => res.status(500).send(handleErrors(err)))
-
-  if (userId === authenticatedUserId) {
-    let start = page > 0 ? (page - 1) * USER_LIMIT_SIZE : 0
-
-    Post.find({ userId })
-      .skip(start + 4)
-      .limit(4)
-      .then(payload => {
-        let data = payload.map(x => delete x._id)
-        res.status(200).send(data)
-      })
-      .catch(err => res.status(500).send(handleErrors(err)))
-  }
+      console.log(data, payload)
+      res.status(200).send({ data })
+    })
+    .catch(err => res.status(500).send(handleErrors(err)))
 }
 
 export async function Add(req, res, next) {
-  let json = JSON.stringify({ 'test': true })
+  const { title } = req.body
+  const { userId: authenticatedUserId } = req.user
+  let postId = generateUniqueId()
+  req.dependentPostId = postId
+  let savedFile = await FileModelSave(req)
 
-  res.send(json)
+  let post = new Post({
+    postId,
+    userId: authenticatedUserId,
+    fileId: savedFile.file.fileId,
+    title,
+  })
+
+  let data = await post.save()
+
+  res.send({ status: true, data })
 }
 
 export async function GetPaginate(req, res) {
-  const { userId: authenticatedUserId } = req.user
-  const { userId, page } = req.params
+  const { page } = req.params
 
-  if (userId === authenticatedUserId) {
-    let start = page > 0 ? (page - 1) * USER_LIMIT_SIZE : 0
+  let start = page > 0 ? (page - 1) * POST_LIMIT_SIZE : 0
 
-    Post.find({ userId })
-      .skip(start + 4)
-      .limit(4)
-      .then(payload => {
-        let data = payload.map(x => delete x._id)
-        res.status(200).send(data)
+  Post.find({ private: false })
+    .skip(start + 4)
+    .limit(4)
+    .then(payload => {
+      let data = payload.map(x => {
+        delete x._id
       })
-      .catch(err => res.status(500).send(handleErrors(err)))
-  }
+      res.status(200).send(data)
+    })
+    .catch(err => res.status(500).send(handleErrors(err)))
 }
 export async function Update(req, res, next) {
   let json = JSON.stringify({ 'test': true })

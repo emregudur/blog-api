@@ -2,19 +2,19 @@ import mongoose, { Schema } from 'mongoose'
 
 const FileSchema = new Schema({
   filename: {
-    required: true,
+    required: [true, 'File name required'],
     type: String,
   },
   category: {
-    required: true,
+    required: [true, 'category required'],
     type: String,
   },
   fileId: {
-    required: true,
+    required: [true, 'fileId required'],
     type: String,
   },
   userId: {
-    required: true,
+    required: [true, 'userId required'],
     type: String,
   },
   dependentPostId: String,

@@ -13,11 +13,11 @@ export async function GetToken(req, res, next) {
         if (err) throw err
 
         if (!user) {
-          return res.json({ status: false, message: 'Auth failed, user not found' })
+          return res.status(401).json({ status: false, message: 'Auth failed, user not found' })
         }
 
         if (user.password !== encrypPassword(password)) {
-          return res.json({ status: false, message: 'Auth failed, username or password wrong' })
+          return res.status(401).json({ status: false, message: 'Auth failed, username or password wrong' })
         } else {
           let payload = {
             userId: user.userId,
@@ -27,7 +27,7 @@ export async function GetToken(req, res, next) {
             surname: user.surname,
           }
           const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-            expiresIn: 1440,
+            expiresIn: '1d',
           })
 
           res.json({ status: true, token })

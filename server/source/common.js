@@ -1,5 +1,15 @@
 import { v4 as uuidv4 } from 'uuid'
 import crypto from 'crypto'
+import mongoose from 'mongoose'
+import { GridFsStorage } from 'multer-gridfs-storage'
+import multer from 'multer'
+import path from 'path'
+
+import dotenv from 'dotenv'
+const result = dotenv.config()
+if (result.error) {
+  throw result.error
+}
 
 export function encrypPassword(text) {
   return crypto.createHash('sha256').update(text).digest('hex')
@@ -38,13 +48,45 @@ export function securePassCheck(password) {
     .filter(x => x)
 }
 
-export const mongodbConnectionUri = () => {
-  const { MONGO_USERNAME, MONGO_PASSWORD, MONGO_DBNAME, MONGO_PORT, MONGO_HOST } = process.env
-  return `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOST}:${MONGO_PORT}/${MONGO_DBNAME}?authSource=admin`
-}
+export const uri = `mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@${process.env.MONGO_HOST}:${process.env.MONGO_PORT}/${process.env.MONGO_DBNAME}?authSource=admin`
 
 export const handleErrors = err => {
   // TODO: save error
   console.log(err)
   return { status: false, message: "There's something wrong", err }
+}
+
+export const upload = () => {
+  const connect = mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+  const conn = mongoose.connection
+  let gfs
+
+  conn.once('open', () => {
+    // initialize stream
+    gfs = new mongoose.mongo.GridFSBucket(conn.db, {
+      bucketName: 'uploads',
+    })
+  })
+
+  const storage = new GridFsStorage({
+    db: connect,
+    file: (req, file) => {
+      return new Promise((resolve, reject) => {
+        crypto.randomBytes(16, (err, buf) => {
+          if (err) {
+            console.log('GridFsStorage err', err)
+            return reject(err)
+          }
+          const filename = buf.toString('hex') + path.extname(file.originalname)
+          const fileInfo = {
+            filename: filename,
+            bucketName: 'uploads',
+          }
+          resolve(fileInfo)
+        })
+      })
+    },
+  })
+
+  return [multer({ storage }), gfs]
 }

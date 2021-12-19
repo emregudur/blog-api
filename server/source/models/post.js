@@ -1,10 +1,7 @@
 import mongoose, { Schema } from 'mongoose'
 
 const PostModel = new Schema({
-  userId: {
-    type: String,
-    required: true,
-  },
+  User: { type: Schema.Types.ObjectId, ref: 'user' },
   postId: {
     type: String,
     required: true,
@@ -22,9 +19,8 @@ const PostModel = new Schema({
     type: String,
     required: true,
   },
-  postImage: {
+  postImageId: {
     type: String,
-    required: true,
   },
   fileType: {
     type: String,
