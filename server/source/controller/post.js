@@ -1,25 +1,26 @@
-import { generateUniqueId, handleErrors, upload } from '../common'
+import { generateUniqueId, handleErrors, clearMongoData } from '../common'
 import Post from '../models/post'
-import User from '../models/user'
+import User, { clearUserModel } from '../models/user'
 import { FileModelSave } from '../controller/file'
 
 const POST_LIMIT_SIZE = 4
 
 export async function Get(req, res, next) {
-  Post.find({})
-    .populate('user')
-    .skip()
-    .limit(4)
-    .then(payload => {
-      let data = payload.map(async x => {
+  try {
+    let posts = await Post.find({}).sort({ _id: -1 }).skip().limit(4)
+
+    let data = await Promise.all(
+      posts.map(async x => {
         delete x._id
         let usr = await User.findOne({ userId: x.userId })
-        return { data: x, user: usr }
+
+        return { ...x._doc, user: clearUserModel(usr) }
       })
-      console.log(data, payload)
-      res.status(200).send({ data })
-    })
-    .catch(err => res.status(500).send(handleErrors(err)))
+    )
+    res.status(200).send(clearMongoData(data))
+  } catch (error) {
+    res.status(500).send(handleErrors(error))
+  }
 }
 
 export async function Add(req, res, next) {

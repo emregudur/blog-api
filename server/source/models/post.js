@@ -1,7 +1,10 @@
 import mongoose, { Schema } from 'mongoose'
 
 const PostModel = new Schema({
-  User: { type: Schema.Types.ObjectId, ref: 'user' },
+  userId: {
+    type: String,
+    required: true,
+  },
   postId: {
     type: String,
     required: true,

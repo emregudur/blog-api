@@ -90,3 +90,16 @@ export const upload = () => {
 
   return [multer({ storage }), gfs]
 }
+
+export function clearMongoData(data) {
+  if (Array.isArray(data))
+    return data.map(x => {
+      delete x._id
+      delete x.__v
+      return x
+    })
+
+  delete data._id
+  delete data.__v
+  return data
+}

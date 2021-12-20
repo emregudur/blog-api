@@ -33,4 +33,11 @@ const UserModel = new Schema({
   },
 })
 
+export function clearUserModel(model) {
+  delete model._doc._id
+  delete model._doc.__v
+  delete model._doc.password
+  return model
+}
+
 export default mongoose.model('user', UserModel)
