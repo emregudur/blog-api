@@ -5,10 +5,10 @@ import fileRouter from './file'
 import authRouter from './auth'
 import registerRouter from './register'
 
-import { Verify as AuthMiddleware } from '../controller/auth'
+import { Verify as AuthMiddleware } from '../middlewares/auth'
 
 export default function setRoutes(app) {
-  app.use('/', AuthMiddleware)
+  // app.use('/', AuthMiddleware)
   app.use('/user', userRouter)
   app.use('/post', postRouter)
   app.use('/auth', authRouter)

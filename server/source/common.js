@@ -58,16 +58,6 @@ export const handleErrors = err => {
 
 export const upload = () => {
   const connect = mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
-  const conn = mongoose.connection
-  let gfs
-
-  conn.once('open', () => {
-    // initialize stream
-    gfs = new mongoose.mongo.GridFSBucket(conn.db, {
-      bucketName: 'uploads',
-    })
-  })
-
   const storage = new GridFsStorage({
     db: connect,
     file: (req, file) => {
@@ -77,9 +67,10 @@ export const upload = () => {
             console.log('GridFsStorage err', err)
             return reject(err)
           }
-          const filename = buf.toString('hex') + path.extname(file.originalname)
+          const filename = buf.toString('hex')
           const fileInfo = {
             filename: filename,
+            ext: path.extname(file.originalname).replace('.', ''),
             bucketName: 'uploads',
           }
           resolve(fileInfo)
@@ -88,7 +79,14 @@ export const upload = () => {
     },
   })
 
-  return [multer({ storage }), gfs]
+  return multer({ storage })
+}
+
+export const gridFsStorage = () => {
+  const conn = mongoose.connection
+  return new mongoose.mongo.GridFSBucket(conn.db, {
+    bucketName: 'uploads',
+  })
 }
 
 export function clearMongoData(data) {
@@ -102,4 +100,29 @@ export function clearMongoData(data) {
   delete data._id
   delete data.__v
   return data
+}
+
+export function slugify(text) {
+  var trMap = {
+    'çÇ': 'c',
+    'ğĞ': 'g',
+    'şŞ': 's',
+    'üÜ': 'u',
+    'ıİ': 'i',
+    'öÖ': 'o',
+  }
+  for (var key in trMap) {
+    text = text.replace(new RegExp('[' + key + ']', 'g'), trMap[key])
+  }
+  return text
+    .replace(/[^-a-zA-Z0-9\s]+/gi, '')
+    .replace(/\s/gi, '-')
+    .replace(/[-]+/gi, '-')
+    .toLowerCase()
+}
+
+export function getFileStoredFileds(data) {
+  return data.map(({ id, filename, size, originalname, mimetype }) => {
+    return { id, filename, size, originalname, mimetype }
+  })
 }

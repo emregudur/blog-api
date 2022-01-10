@@ -9,7 +9,16 @@ const PostModel = new Schema({
     type: String,
     required: true,
   },
-  title: String,
+  accessLink: {
+    type: String,
+    required: true,
+    maxlength: 80,
+  },
+  title: {
+    type: String,
+    required: true,
+    maxlength: 80,
+  },
   createdAt: {
     type: Date,
     default: Date.now(),
@@ -19,15 +28,24 @@ const PostModel = new Schema({
     default: Date.now(),
   },
   fileId: {
-    type: String,
+    type: Schema.Types.ObjectId,
     required: true,
   },
-  postImageId: {
-    type: String,
+  postImage: {
+    type: Schema.Types.ObjectId,
   },
-  fileType: {
+  dependentFilesStore: {
+    type: Array,
+  },
+  tags: {
+    type: Array,
+  },
+  categories: {
+    type: Array,
+  },
+  postFileMimetype: {
     type: String,
-    default: 'MD',
+    default: 'text/markdown',
   },
   private: {
     type: Boolean,

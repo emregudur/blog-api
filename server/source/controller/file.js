@@ -1,6 +1,5 @@
 import mongoose from 'mongoose'
-import File from '../models/file'
-import { generateUniqueId, upload } from '../common'
+import { generateUniqueId, gridFsStorage, upload } from '../common'
 import path from 'path'
 
 export async function CheckFile(req) {
@@ -66,21 +65,27 @@ export async function Save(req, res) {
 }
 
 export async function GetFile(req, res) {
-  let [uploader, gfs] = upload
-  gfs.find({ fileId: req.params.id }).toArray((err, files) => {
-    if (!files[0] || files.length === 0) {
-      return res.status(200).json({
-        success: false,
-        message: 'No files available',
-      })
-    }
+  let gfs = gridFsStorage()
+  try {
+    gfs.find({ filename: req.params.id }).toArray((err, files) => {
+      if (!files[0] || files.length === 0) {
+        return res.status(200).json({
+          success: false,
+          message: 'No files available',
+        })
+      }
 
-    gfs.openDownloadStreamByName(req.params.filename).pipe(res)
-  })
+      console.log(files)
+
+      gfs.openDownloadStreamByName(req.params.id).pipe(res)
+    })
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 export async function DeleteFile(req, res) {
-  let [uploader, gfs] = upload
+  let gfs = gridFsStorage()
 
   gfs.delete(new mongoose.Types.ObjectId(req.params.id), (err, data) => {
     if (err) {
