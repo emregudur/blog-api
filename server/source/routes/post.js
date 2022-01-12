@@ -6,6 +6,7 @@ import { Verify as AuthMiddleware } from '../middlewares/auth'
 import * as PostController from '../controller/post'
 
 Router.get('/', PostController.Get)
+Router.get('/:id', PostController.GetWidthId)
 Router.get('/:page/page', PostController.GetPaginate)
 Router.get('/user/:userId', PostController.Get)
 

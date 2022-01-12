@@ -8,11 +8,14 @@ const PostModel = new Schema({
   postId: {
     type: String,
     required: true,
+    unique: true,
   },
   accessLink: {
     type: String,
     required: true,
     maxlength: 80,
+    unique: true,
+
   },
   title: {
     type: String,
@@ -28,11 +31,12 @@ const PostModel = new Schema({
     default: Date.now(),
   },
   fileId: {
-    type: Schema.Types.ObjectId,
+    type: String,
     required: true,
   },
   postImage: {
-    type: Schema.Types.ObjectId,
+    type: String,
+    required: true,
   },
   dependentFilesStore: {
     type: Array,

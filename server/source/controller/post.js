@@ -22,6 +22,25 @@ export async function Get(req, res, next) {
   }
 }
 
+export async function GetWidthId(req, res) {
+  try {
+    let posts = await Post.find({ accessLink: req.params.id })
+
+    let data = await Promise.all(
+      posts.map(async x => {
+        delete x._id
+        let usr = await User.findOne({ userId: x.userId })
+
+        return { ...x._doc, user: clearUserModel(usr) }
+      })
+    )
+    res.status(200).send(clearMongoData(data[0]))
+  } catch (error) {
+    res.status(500).send(handleErrors(error))
+  }
+
+}
+
 export async function Add(req, res, next) {
   try {
     const { title, tags, categories } = req.body
@@ -30,8 +49,8 @@ export async function Add(req, res, next) {
     let postId = generateUniqueId()
 
     let dependentFilesStore = getFileStoredFileds(files.dependentFilesStore)
-    let fileId = files.postFile[0].id
-    let postImage = files.postImage[0].id
+    let fileId = files.postFile[0].filename
+    let postImage = files.postImage[0].filename
 
     let postData = {
       postId,

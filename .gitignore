@@ -5,3 +5,4 @@ dist-server
 .env
 .vscode
 out
+.DS_Store
