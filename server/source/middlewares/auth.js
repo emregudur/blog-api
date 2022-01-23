@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken'
 
 export async function Verify(req, res, next) {
-  console.log(req.path, req.method)
   // if (req.path.replace(/[/]/gi, '') === 'post' && req.method === 'GET') {
   //   next()
   //   return

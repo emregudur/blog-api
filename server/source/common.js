@@ -52,7 +52,6 @@ export const uri = `mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_
 
 export const handleErrors = err => {
   // TODO: save error
-  console.log(err)
   return { status: false, message: "There's something wrong", err }
 }
 

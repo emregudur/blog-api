@@ -10,7 +10,7 @@ export default async function () {
         resolve(true)
       })
       .catch(function (err) {
-        console.log(err)
+        console.error(err)
         reject(err)
       })
   })

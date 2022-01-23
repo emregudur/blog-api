@@ -75,12 +75,10 @@ export async function GetFile(req, res) {
         })
       }
 
-      console.log(files)
-
       gfs.openDownloadStreamByName(req.params.id).pipe(res)
     })
   } catch (error) {
-    console.log(error)
+    console.error(error)
   }
 }
 

@@ -38,7 +38,6 @@ export async function GetWidthId(req, res) {
   } catch (error) {
     res.status(500).send(handleErrors(error))
   }
-
 }
 
 export async function Add(req, res, next) {
@@ -114,4 +113,14 @@ export async function Delete(req, res, next) {
       res.status(200).send({ status: true, message: 'Successful' })
     })
     .catch(err => res.status(401).send(handleErrors(err)))
+}
+
+export async function GetUserPosts(req, res) {
+  try {
+    const { postId } = req.query
+    let post = await Post.findOne({ postId })
+    res.status(200).send(clearMongoData(post))
+  } catch (error) {
+    res.status(401).send(handleErrors(error))
+  }
 }

@@ -3,11 +3,11 @@ import { encrypPassword } from '../common'
 import User from '../models/user'
 
 export async function GetToken(req, res, next) {
-  const { username, password } = req.body
+  const { email, password } = req.body
   try {
     User.findOne(
       {
-        username,
+        email,
       },
       (err, user) => {
         if (err) throw err
@@ -17,7 +17,7 @@ export async function GetToken(req, res, next) {
         }
 
         if (user.password !== encrypPassword(password)) {
-          return res.status(401).json({ status: false, message: 'Auth failed, username or password wrong' })
+          return res.status(401).json({ status: false, message: 'Auth failed, email or password wrong' })
         } else {
           let payload = {
             userId: user.userId,
@@ -35,6 +35,6 @@ export async function GetToken(req, res, next) {
       }
     )
   } catch (error) {
-    console.log(error)
+    console.error(error)
   }
 }

@@ -28,5 +28,5 @@ export const getUser = async userId => {
       !user._doc.isAdmin ? delete user._doc.isAdmin : null
       return user
     })
-    .catch(handleErrors)
+    .catch(err => res.status(401).send(handleErrors(err)))
 }

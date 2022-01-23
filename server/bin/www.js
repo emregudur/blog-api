@@ -13,8 +13,6 @@ var debug = debugLib('api:server')
  * Get port from environment and store in Express.
  */
 
-console.log(process.env.PORT)
-
 var port = normalizePort(process.env.PORT || '3000')
 app.set('port', port)
 

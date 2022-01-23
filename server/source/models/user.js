@@ -6,7 +6,7 @@ const UserModel = new Schema({
     unique: true,
     required: true,
   },
-  username: {
+  email: {
     type: String,
     unique: true,
     required: true,
@@ -20,10 +20,6 @@ const UserModel = new Schema({
     required: true,
   },
   surname: {
-    type: String,
-    required: true,
-  },
-  email: {
     type: String,
     required: true,
   },
