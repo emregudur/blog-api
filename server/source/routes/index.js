@@ -3,9 +3,10 @@ import userRouter from './user'
 import postRouter from './post'
 import fileRouter from './file'
 import authRouter from './auth'
+import commentRouter from './comment'
+import replyRouter from './reply'
+import adminRouter from './admin'
 import registerRouter from './register'
-
-import { Verify as AuthMiddleware } from '../middlewares/auth'
 
 export default function setRoutes(app) {
   // app.use('/', AuthMiddleware)
@@ -14,6 +15,9 @@ export default function setRoutes(app) {
   app.use('/auth', authRouter)
   app.use('/register', registerRouter)
   app.use('/file', fileRouter)
+  app.use('/comment', commentRouter)
+  app.use('/reply', replyRouter)
+  app.use('/admin', adminRouter)
 
   app.use((req, res, next) => {
     // req.clientId = getClientIdFromToken(req.token || 1);

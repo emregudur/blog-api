@@ -12,6 +12,7 @@ export async function Get(req, res, next) {
       posts.map(async x => {
         delete x._id
         let usr = await User.findOne({ userId: x.userId })
+        delete x._doc['dependentFiles']
 
         return { ...x._doc, user: clearUserModel(usr) }
       })
@@ -30,6 +31,7 @@ export async function GetWidthId(req, res) {
       posts.map(async x => {
         delete x._id
         let usr = await User.findOne({ userId: x.userId })
+        delete x._doc['dependentFiles']
 
         return { ...x._doc, user: clearUserModel(usr) }
       })
@@ -47,7 +49,7 @@ export async function Add(req, res, next) {
     const files = req.files
     let postId = generateUniqueId()
 
-    let dependentFilesStore = getFileStoredFileds(files.dependentFilesStore)
+    let dependentFiles = getFileStoredFileds(files.dependentFiles)
     let fileId = files.postFile[0].filename
     let postImage = files.postImage[0].filename
 
@@ -59,12 +61,12 @@ export async function Add(req, res, next) {
       postImage,
       tags: JSON.parse(tags),
       categories: JSON.parse(categories),
-      dependentFilesStore,
+      dependentFiles,
       accessLink: slugify(title),
     }
 
     let data = await new Post(postData).save()
-    delete data._doc['dependentFilesStore']
+    delete data._doc['dependentFiles']
 
     res.status(200).send(clearMongoData(data._doc))
   } catch (error) {
@@ -86,6 +88,7 @@ export async function GetPaginate(req, res) {
       posts.map(async x => {
         delete x._id
         let usr = await User.findOne({ userId: x.userId })
+        delete x._doc['dependentFiles']
 
         return { ...x._doc, user: clearUserModel(usr) }
       })
@@ -122,5 +125,28 @@ export async function GetUserPosts(req, res) {
     res.status(200).send(clearMongoData(post))
   } catch (error) {
     res.status(401).send(handleErrors(error))
+  }
+}
+
+export async function Search(req, res) {
+  const { search } = req.params
+  try {
+    let posts = await Post.find({ private: false, title: { $regex: search, $options: 'i' } })
+      .sort({ _id: -1 })
+      .limit(4)
+
+    let data = await Promise.all(
+      posts.map(async x => {
+        delete x._id
+        let usr = await User.findOne({ userId: x.userId })
+        delete x._doc['dependentFiles']
+
+        return { ...x._doc, user: clearUserModel(usr) }
+      })
+    )
+
+    res.status(200).send(clearMongoData(data))
+  } catch (error) {
+    res.status(200).send(handleErrors(error))
   }
 }

@@ -4,43 +4,37 @@ const UserModel = new Schema(
   {
     userId: {
       type: String,
-      unique: true,
       required: true,
     },
     email: {
       type: String,
+      required: true,
+    },
+    fullname: {
+      type: String,
+      required: true,
+    },
+    commentId: {
+      type: String,
       unique: true,
       required: true,
     },
-    password: {
+    comment: {
       type: String,
       required: true,
     },
-    name: {
-      type: String,
-      required: true,
-    },
-    surname: {
-      type: String,
-      required: true,
-    },
-    active: {
-      type: Boolean,
-      default: false,
-    },
-    isAdmin: {
-      default: false,
-      type: Boolean,
+    reply: {
+      type: Array,
     },
   },
   { timestamps: true }
 )
 
-export function clearUserModel(model) {
+export function clearCommentModel(model) {
   delete model._doc._id
   delete model._doc.__v
   delete model._doc.password
   return model
 }
 
-export default mongoose.model('user', UserModel)
+export default mongoose.model('comment', UserModel)

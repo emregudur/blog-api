@@ -9,6 +9,7 @@ Router.get('/', PostController.Get)
 Router.get('/:id', PostController.GetWidthId)
 Router.get('/:page/page', PostController.GetPaginate)
 Router.get('/user/:userId', PostController.Get)
+Router.get('/search/:search', PostController.Search)
 
 Router.post(
   '/add',
@@ -16,7 +17,7 @@ Router.post(
   upload().fields([
     { name: 'postFile', maxCount: 1 },
     { name: 'postImage', maxCount: 1 },
-    { name: 'dependentFilesStore', maxCount: 10 },
+    { name: 'dependentFiles', maxCount: 10 },
   ]),
   PostController.Add
 )
