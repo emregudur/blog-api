@@ -23,6 +23,8 @@ export async function Verify(req, res, next) {
   jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
     if (err) return res.status(401).send({ status: false, message: 'Auth failed', error: err })
 
+    if (!decoded.isAdmin && (decoded.active === false || decoded.active === undefined)) return res.status(401).send({ status: false, message: 'Auth failed, user not active' })
+
     req.user = decoded
     next()
   })

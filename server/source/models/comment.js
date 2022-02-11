@@ -27,6 +27,10 @@ const CommentModel = new Schema(
       type: String,
       required: true,
     },
+    active: {
+      type: Boolean,
+      default: false,
+    },
     score: {
       type: Object,
       default: {
@@ -37,11 +41,5 @@ const CommentModel = new Schema(
   },
   { timestamps: true }
 )
-
-export function clearCommentModel(model) {
-  delete model._doc._id
-  delete model._doc.__v
-  return model
-}
 
 export default mongoose.model('comment', CommentModel)

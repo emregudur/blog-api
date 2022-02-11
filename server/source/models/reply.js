@@ -46,10 +46,4 @@ const ReplyModel = new Schema(
   { timestamps: true }
 )
 
-export function clearReplyModel(model) {
-  delete model._doc._id
-  delete model._doc.__v
-  return model
-}
-
 export default mongoose.model('reply', ReplyModel)

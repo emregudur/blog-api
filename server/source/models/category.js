@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
+import { defaultProjection } from '../common'
 
 const CategoryModel = new Schema(
   {
@@ -16,18 +17,16 @@ const CategoryModel = new Schema(
     },
     active: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
   { timestamps: true }
 )
 
-export function clearCategoryModel(model) {
-  delete model._doc._id
-  delete model._doc.__v
-  delete model._doc.userId
-  delete model._doc.active
-  return model
+export const categoryProjection = {
+  ...defaultProjection,
+  userId: false,
+  active: false,
 }
 
 export default mongoose.model('categories', CategoryModel)

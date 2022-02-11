@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
+import { defaultProjection } from '../common'
 
 const UserModel = new Schema(
   {
@@ -36,11 +37,9 @@ const UserModel = new Schema(
   { timestamps: true }
 )
 
-export function clearUserModel(model) {
-  delete model._doc._id
-  delete model._doc.__v
-  delete model._doc.password
-  return model
+export const userProjection = {
+  ...defaultProjection,
+  password: false,
 }
 
 export default mongoose.model('user', UserModel)

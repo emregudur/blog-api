@@ -1,8 +1,8 @@
-import { generateUniqueId, handleErrors, clearMongoData, slugify, getFileStoredFileds } from '../common'
-import Post, { clearPostModel } from '../models/post'
-import Category, { clearCategoryModel } from '../models/category'
-import Tag, { clearTagModel } from '../models/tag'
-import User, { clearUserModel } from '../models/user'
+import { generateUniqueId, handleErrors, slugify, getFileStoredFileds } from '../common'
+import Post, { postProjection } from '../models/post'
+import Category, { categoryProjection } from '../models/category'
+import Tag, { tagProjection } from '../models/tag'
+import User, { userProjection } from '../models/user'
 
 const POST_LIMIT_SIZE = 4
 const defaultPostFilter = {
@@ -13,20 +13,20 @@ const defaultPostFilter = {
 async function postUserInfo(posts) {
   return await Promise.all(
     posts.map(async x => {
-      let usr = await User.findOne({ userId: x.userId })
+      let user = await User.findOne({ userId: x.userId }, userProjection)
 
-      return { ...clearPostModel(x)._doc, user: clearUserModel(usr) }
+      return { ...x._doc, user }
     })
   )
 }
 
 export async function GetSlug(req, res) {
   try {
-    let posts = await Post.find({ ...defaultPostFilter, accessLink: req.params.id })
+    let posts = await Post.find({ ...defaultPostFilter, accessLink: req.params.id }, postProjection)
 
     let data = await postUserInfo(posts)
 
-    res.status(200).send(clearMongoData(data[0]))
+    res.status(200).send(data[0])
   } catch (error) {
     res.status(500).send(handleErrors(error))
   }
@@ -46,26 +46,28 @@ export async function Add(req, res, next) {
     // TODO: check tag names on db
     let savedTags = await Promise.all(
       JSON.parse(tags).map(async tagName => {
-        let tag = await new Tag({
-          tagId: generateUniqueId(),
-          name: tagName,
-          userId: req.user.userId,
-        }).save()
-
-        return clearTagModel(tag)
+        return await new Tag(
+          {
+            tagId: generateUniqueId(),
+            name: tagName,
+            userId: req.user.userId,
+          },
+          tagProjection
+        ).save()
       })
     )
 
     // TODO: check category names on db
     let savedCategories = await Promise.all(
       JSON.parse(categories).map(async categoryName => {
-        let category = await new Category({
-          categoryId: generateUniqueId(),
-          name: categoryName,
-          userId: req.user.userId,
-        }).save()
-
-        return clearCategoryModel(category)
+        return await new Category(
+          {
+            categoryId: generateUniqueId(),
+            name: categoryName,
+            userId: req.user.userId,
+          },
+          categoryProjection
+        ).save()
       })
     )
 
@@ -81,9 +83,9 @@ export async function Add(req, res, next) {
       accessLink: slugify(title),
     }
 
-    let data = await new Post(postData).save()
+    let data = await new Post(postData, postProjection).save()
 
-    res.status(200).send(clearPostModel(data))
+    res.status(200).send(data)
   } catch (error) {
     res.status(200).send(handleErrors(error))
   }
@@ -95,13 +97,13 @@ export async function GetPage(req, res) {
     page = parseInt(page)
     let start = page > 0 ? (page - 1) * POST_LIMIT_SIZE : 0
 
-    let posts = await Post.find({ ...defaultPostFilter })
+    let posts = await Post.find({ ...defaultPostFilter }, postProjection)
       .sort({ _id: -1 })
       .skip(start)
       .limit(POST_LIMIT_SIZE)
     let data = await postUserInfo(posts)
 
-    res.status(200).send(clearMongoData(data))
+    res.status(200).send(data)
   } catch (error) {
     res.status(200).send(handleErrors(error))
   }
@@ -119,12 +121,12 @@ export async function GetUserPosts(req, res) {
     page = parseInt(page)
     let start = page > 0 ? (page - 1) * POST_LIMIT_SIZE : 0
 
-    let posts = await Post.find({ ...defaultPostFilter, userId })
+    let posts = await Post.find({ ...defaultPostFilter, userId }, postProjection)
       .sort({ _id: -1 })
       .skip(start)
       .limit(POST_LIMIT_SIZE)
 
-    res.status(200).send(clearMongoData(posts))
+    res.status(200).send(posts)
   } catch (error) {
     res.status(200).send(handleErrors(error))
   }
@@ -133,13 +135,13 @@ export async function GetUserPosts(req, res) {
 export async function Search(req, res) {
   try {
     const { search } = req.params
-    let posts = await Post.find({ ...defaultPostFilter, title: { $regex: search, $options: 'i' } })
+    let posts = await Post.find({ ...defaultPostFilter, title: { $regex: search, $options: 'i' } }, postProjection)
       .sort({ _id: -1 })
       .limit(4)
 
     let data = await postUserInfo(posts)
 
-    res.status(200).send(clearMongoData(data))
+    res.status(200).send(data)
   } catch (error) {
     res.status(200).send(handleErrors(error))
   }

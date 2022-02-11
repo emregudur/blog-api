@@ -1,17 +1,17 @@
-import { generateUniqueId, handle, handleErrors } from '../common'
-import Comment, { clearCommentModel } from '../models/comment'
-import Reply, { clearReplyModel } from '../models/reply'
+import { defaultProjection, generateUniqueId, handleErrors } from '../common'
+import Comment from '../models/comment'
+import Reply from '../models/reply'
 
 export async function GetComments(req, res) {
   try {
     const { postId } = req.params
 
-    let comments = await Comment.find({ postId, active: false }).sort({ _id: -1 })
-    let reply = await Reply.find({ postId, active: false }).sort({ _id: -1 })
+    let comments = await Comment.find({ postId, active: true }, defaultProjection).sort({ _id: -1 })
+    let reply = await Reply.find({ postId, active: true }, defaultProjection).sort({ _id: -1 })
     let withReply = comments.map(comment => {
       return {
-        comment: clearCommentModel(comment),
-        reply: reply.filter(x => (x.commentId === comment.commentId ? clearReplyModel(x) : false)),
+        comment,
+        reply: reply.filter(x => x.commentId === comment.commentId),
       }
     })
 

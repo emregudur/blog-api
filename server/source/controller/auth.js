@@ -1,40 +1,32 @@
 import jwt from 'jsonwebtoken'
-import { encrypPassword } from '../common'
-import User from '../models/user'
+import { encrypPassword, handleErrors } from '../common'
+import User, { userProjection } from '../models/user'
 
 export async function GetToken(req, res, next) {
   const { email, password } = req.body
   try {
-    User.findOne(
-      {
-        email,
-      },
-      (err, user) => {
-        if (err) throw err
+    let user = await User.findOne({ email }, userProjection)
 
-        if (!user) {
-          return res.status(401).json({ status: false, message: 'Auth failed, user not found' })
-        }
+    if (!user) {
+      throw new Error('Auth failed, user not found')
+    }
 
-        if (user.password !== encrypPassword(password)) {
-          return res.status(401).json({ status: false, message: 'Auth failed, email or password wrong' })
-        } else {
-          let payload = {
-            userId: user.userId,
-            email: user.email,
-            isAdmin: user.isAdmin,
-            name: user.name,
-            surname: user.surname,
-          }
-          const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-            expiresIn: '1d',
-          })
-
-          res.json({ status: true, token })
-        }
+    if (user.password !== encrypPassword(password)) {
+      throw new Error('Auth failed, email or password wrong')
+    } else if (user.active === false) {
+      throw new Error('Auth failed, user not active')
+    } else {
+      let payload = {
+        ...user,
       }
-    )
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+        expiresIn: '1d',
+      })
+
+      res.json({ status: true, token })
+    }
   } catch (error) {
-    console.error(error)
+    res.status(401).send(handleErrors(error))
   }
 }

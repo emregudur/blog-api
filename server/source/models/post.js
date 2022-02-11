@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
+import { defaultProjection } from '../common'
 
 const PostModel = new Schema(
   {
@@ -58,17 +59,15 @@ const PostModel = new Schema(
     },
     active: {
       type: Boolean,
-      default: true,
+      default: false,
     },
   },
   { timestamps: true }
 )
 
-export function clearPostModel(model) {
-  delete model._doc._id
-  delete model._doc.__v
-  delete model._doc.dependentFiles
-  return model
+export const postProjection = {
+  ...defaultProjection,
+  dependentFiles: false,
 }
 
 export default mongoose.model('post', PostModel)

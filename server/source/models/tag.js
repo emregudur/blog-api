@@ -1,4 +1,5 @@
 import mongoose, { Schema } from 'mongoose'
+import { defaultProjection } from '../common'
 
 const TagModel = new Schema(
   {
@@ -22,12 +23,10 @@ const TagModel = new Schema(
   { timestamps: true }
 )
 
-export function clearTagModel(model) {
-  delete model._doc._id
-  delete model._doc.__v
-  delete model._doc.userId
-  delete model._doc.active
-  return model
+export const tagProjection = {
+  ...defaultProjection,
+  userId: false,
+  active: false,
 }
 
 export default mongoose.model('tags', TagModel)

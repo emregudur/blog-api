@@ -88,19 +88,6 @@ export const gridFsStorage = () => {
   })
 }
 
-export function clearMongoData(data) {
-  if (Array.isArray(data))
-    return data.map(x => {
-      delete x._id
-      delete x.__v
-      return x
-    })
-
-  delete data._id
-  delete data.__v
-  return data
-}
-
 export function slugify(text) {
   var trMap = {
     'çÇ': 'c',
@@ -124,4 +111,9 @@ export function getFileStoredFileds(data) {
   return data.map(({ id, filename, size, originalname, mimetype }) => {
     return { id, filename, size, originalname, mimetype }
   })
+}
+
+export const defaultProjection = {
+  _id: false,
+  __v: false,
 }
