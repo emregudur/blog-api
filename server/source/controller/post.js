@@ -1,41 +1,31 @@
 import { generateUniqueId, handleErrors, clearMongoData, slugify, getFileStoredFileds } from '../common'
-import Post from '../models/post'
+import Post, { clearPostModel } from '../models/post'
+import Category, { clearCategoryModel } from '../models/category'
+import Tag, { clearTagModel } from '../models/tag'
 import User, { clearUserModel } from '../models/user'
 
 const POST_LIMIT_SIZE = 4
-
-export async function Get(req, res, next) {
-  try {
-    let posts = await Post.find({}).sort({ _id: -1 }).skip().limit(4)
-
-    let data = await Promise.all(
-      posts.map(async x => {
-        delete x._id
-        let usr = await User.findOne({ userId: x.userId })
-        delete x._doc['dependentFiles']
-
-        return { ...x._doc, user: clearUserModel(usr) }
-      })
-    )
-    res.status(200).send(clearMongoData(data))
-  } catch (error) {
-    res.status(500).send(handleErrors(error))
-  }
+const defaultPostFilter = {
+  active: true,
+  private: false,
 }
 
-export async function GetWidthId(req, res) {
+async function postUserInfo(posts) {
+  return await Promise.all(
+    posts.map(async x => {
+      let usr = await User.findOne({ userId: x.userId })
+
+      return { ...clearPostModel(x)._doc, user: clearUserModel(usr) }
+    })
+  )
+}
+
+export async function GetSlug(req, res) {
   try {
-    let posts = await Post.find({ accessLink: req.params.id })
+    let posts = await Post.find({ ...defaultPostFilter, accessLink: req.params.id })
 
-    let data = await Promise.all(
-      posts.map(async x => {
-        delete x._id
-        let usr = await User.findOne({ userId: x.userId })
-        delete x._doc['dependentFiles']
+    let data = await postUserInfo(posts)
 
-        return { ...x._doc, user: clearUserModel(usr) }
-      })
-    )
     res.status(200).send(clearMongoData(data[0]))
   } catch (error) {
     res.status(500).send(handleErrors(error))
@@ -53,46 +43,63 @@ export async function Add(req, res, next) {
     let fileId = files.postFile[0].filename
     let postImage = files.postImage[0].filename
 
+    // TODO: check tag names on db
+    let savedTags = await Promise.all(
+      JSON.parse(tags).map(async tagName => {
+        let tag = await new Tag({
+          tagId: generateUniqueId(),
+          name: tagName,
+          userId: req.user.userId,
+        }).save()
+
+        return clearTagModel(tag)
+      })
+    )
+
+    // TODO: check category names on db
+    let savedCategories = await Promise.all(
+      JSON.parse(categories).map(async categoryName => {
+        let category = await new Category({
+          categoryId: generateUniqueId(),
+          name: categoryName,
+          userId: req.user.userId,
+        }).save()
+
+        return clearCategoryModel(category)
+      })
+    )
+
     let postData = {
       postId,
       userId,
       title,
       fileId,
       postImage,
-      tags: JSON.parse(tags),
-      categories: JSON.parse(categories),
+      tags: savedTags,
+      categories: savedCategories,
       dependentFiles,
       accessLink: slugify(title),
     }
 
     let data = await new Post(postData).save()
-    delete data._doc['dependentFiles']
 
-    res.status(200).send(clearMongoData(data._doc))
+    res.status(200).send(clearPostModel(data))
   } catch (error) {
     res.status(200).send(handleErrors(error))
   }
 }
 
-export async function GetPaginate(req, res) {
-  const { page } = req.params
-  let start = page > 0 ? (page - 1) * POST_LIMIT_SIZE : 0
-
+export async function GetPage(req, res) {
   try {
-    let posts = await Post.find({ private: false })
+    let { page } = req.params
+    page = parseInt(page)
+    let start = page > 0 ? (page - 1) * POST_LIMIT_SIZE : 0
+
+    let posts = await Post.find({ ...defaultPostFilter })
       .sort({ _id: -1 })
-      .skip(start * 4)
-      .limit(4)
-
-    let data = await Promise.all(
-      posts.map(async x => {
-        delete x._id
-        let usr = await User.findOne({ userId: x.userId })
-        delete x._doc['dependentFiles']
-
-        return { ...x._doc, user: clearUserModel(usr) }
-      })
-    )
+      .skip(start)
+      .limit(POST_LIMIT_SIZE)
+    let data = await postUserInfo(posts)
 
     res.status(200).send(clearMongoData(data))
   } catch (error) {
@@ -106,44 +113,31 @@ export async function Update(req, res, next) {
   res.send(json)
 }
 
-export async function Delete(req, res, next) {
-  if (!req.user.isAdmin) res.status(401).send({ status: false, message: 'Unauthorized' })
-
-  const { id: postId } = req.query
-
-  Post.deleteOne({ postId })
-    .then(payload => {
-      res.status(200).send({ status: true, message: 'Successful' })
-    })
-    .catch(err => res.status(401).send(handleErrors(err)))
-}
-
 export async function GetUserPosts(req, res) {
   try {
-    const { postId } = req.query
-    let post = await Post.findOne({ postId })
-    res.status(200).send(clearMongoData(post))
+    let { userId, page } = req.params
+    page = parseInt(page)
+    let start = page > 0 ? (page - 1) * POST_LIMIT_SIZE : 0
+
+    let posts = await Post.find({ ...defaultPostFilter, userId })
+      .sort({ _id: -1 })
+      .skip(start)
+      .limit(POST_LIMIT_SIZE)
+
+    res.status(200).send(clearMongoData(posts))
   } catch (error) {
-    res.status(401).send(handleErrors(error))
+    res.status(200).send(handleErrors(error))
   }
 }
 
 export async function Search(req, res) {
-  const { search } = req.params
   try {
-    let posts = await Post.find({ private: false, title: { $regex: search, $options: 'i' } })
+    const { search } = req.params
+    let posts = await Post.find({ ...defaultPostFilter, title: { $regex: search, $options: 'i' } })
       .sort({ _id: -1 })
       .limit(4)
 
-    let data = await Promise.all(
-      posts.map(async x => {
-        delete x._id
-        let usr = await User.findOne({ userId: x.userId })
-        delete x._doc['dependentFiles']
-
-        return { ...x._doc, user: clearUserModel(usr) }
-      })
-    )
+    let data = await postUserInfo(posts)
 
     res.status(200).send(clearMongoData(data))
   } catch (error) {

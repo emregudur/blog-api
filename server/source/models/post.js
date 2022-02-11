@@ -49,13 +49,26 @@ const PostModel = new Schema(
       type: Boolean,
       default: false,
     },
+    score: {
+      type: Object,
+      default: {
+        like: 0,
+        unlike: 0,
+      },
+    },
     active: {
       type: Boolean,
       default: true,
     },
-    comments: Array,
   },
   { timestamps: true }
 )
+
+export function clearPostModel(model) {
+  delete model._doc._id
+  delete model._doc.__v
+  delete model._doc.dependentFiles
+  return model
+}
 
 export default mongoose.model('post', PostModel)

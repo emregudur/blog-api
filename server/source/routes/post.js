@@ -5,11 +5,11 @@ const Router = express.Router()
 import { Verify as AuthMiddleware } from '../middlewares/auth'
 import * as PostController from '../controller/post'
 
-Router.get('/', PostController.Get)
-Router.get('/:id', PostController.GetWidthId)
-Router.get('/:page/page', PostController.GetPaginate)
-Router.get('/user/:userId', PostController.Get)
+Router.get('/:id', PostController.GetSlug)
+Router.get('/:page/page', PostController.GetPage)
+Router.get('/user/:userId/:page/page', PostController.GetUserPosts)
 Router.get('/search/:search', PostController.Search)
+Router.put('/:id', AuthMiddleware, PostController.Update)
 
 Router.post(
   '/add',
@@ -21,9 +21,5 @@ Router.post(
   ]),
   PostController.Add
 )
-
-Router.put('/:id', AuthMiddleware, PostController.Update)
-
-Router.delete('/:id', AuthMiddleware, PostController.Delete)
 
 export default Router

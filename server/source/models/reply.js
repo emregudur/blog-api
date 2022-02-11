@@ -1,6 +1,6 @@
 import mongoose, { Schema } from 'mongoose'
 
-const CommentModel = new Schema(
+const ReplyModel = new Schema(
   {
     userId: {
       type: String,
@@ -16,6 +16,10 @@ const CommentModel = new Schema(
     },
     commentId: {
       type: String,
+      required: true,
+    },
+    replyId: {
+      type: String,
       unique: true,
       required: true,
     },
@@ -26,6 +30,10 @@ const CommentModel = new Schema(
     text: {
       type: String,
       required: true,
+    },
+    active: {
+      type: Boolean,
+      default: false,
     },
     score: {
       type: Object,
@@ -38,10 +46,10 @@ const CommentModel = new Schema(
   { timestamps: true }
 )
 
-export function clearCommentModel(model) {
+export function clearReplyModel(model) {
   delete model._doc._id
   delete model._doc.__v
   return model
 }
 
-export default mongoose.model('comment', CommentModel)
+export default mongoose.model('reply', ReplyModel)
