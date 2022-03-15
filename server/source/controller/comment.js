@@ -10,7 +10,7 @@ export async function GetComments(req, res) {
     let reply = await Reply.find({ postId, active: true }, defaultProjection).sort({ _id: -1 })
     let withReply = comments.map(comment => {
       return {
-        comment,
+        ...comment._doc,
         reply: reply.filter(x => x.commentId === comment.commentId),
       }
     })

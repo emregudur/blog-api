@@ -46,28 +46,22 @@ export async function Add(req, res, next) {
     // TODO: check tag names on db
     let savedTags = await Promise.all(
       JSON.parse(tags).map(async tagName => {
-        return await new Tag(
-          {
-            tagId: generateUniqueId(),
-            name: tagName,
-            userId: req.user.userId,
-          },
-          tagProjection
-        ).save()
+        return await new Tag({
+          tagId: generateUniqueId(),
+          name: tagName,
+          userId: req.user.userId,
+        }).save()
       })
     )
 
     // TODO: check category names on db
     let savedCategories = await Promise.all(
       JSON.parse(categories).map(async categoryName => {
-        return await new Category(
-          {
-            categoryId: generateUniqueId(),
-            name: categoryName,
-            userId: req.user.userId,
-          },
-          categoryProjection
-        ).save()
+        return await new Category({
+          categoryId: generateUniqueId(),
+          name: categoryName,
+          userId: req.user.userId,
+        }).save()
       })
     )
 
@@ -83,7 +77,7 @@ export async function Add(req, res, next) {
       accessLink: slugify(title),
     }
 
-    let data = await new Post(postData, postProjection).save()
+    let data = await new Post(postData).save()
 
     res.status(200).send(data)
   } catch (error) {
@@ -101,6 +95,7 @@ export async function GetPage(req, res) {
       .sort({ _id: -1 })
       .skip(start)
       .limit(POST_LIMIT_SIZE)
+
     let data = await postUserInfo(posts)
 
     res.status(200).send(data)

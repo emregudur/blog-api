@@ -55,7 +55,7 @@ export const handleErrors = err => {
   return { status: false, message: "There's something wrong", errorMessage: err?.message }
 }
 
-export const upload = () => {
+export const upload = (profileImage = false) => {
   const connect = mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   const storage = new GridFsStorage({
     db: connect,
@@ -71,6 +71,10 @@ export const upload = () => {
             filename: filename,
             ext: path.extname(file.originalname).replace('.', ''),
             bucketName: 'uploads',
+            metadata: {
+              userId: req.user.userId,
+              profileImage,
+            },
           }
           resolve(fileInfo)
         })

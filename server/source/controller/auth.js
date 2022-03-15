@@ -5,7 +5,7 @@ import User, { userProjection } from '../models/user'
 export async function GetToken(req, res, next) {
   const { email, password } = req.body
   try {
-    let user = await User.findOne({ email }, userProjection)
+    let user = await User.findOne({ email })
 
     if (!user) {
       throw new Error('Auth failed, user not found')
@@ -17,8 +17,12 @@ export async function GetToken(req, res, next) {
       throw new Error('Auth failed, user not active')
     } else {
       let payload = {
-        ...user,
+        ...user._doc,
       }
+
+      delete payload.password
+      delete payload._id
+      delete payload.__v
 
       const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
         expiresIn: '1d',
