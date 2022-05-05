@@ -11,15 +11,6 @@ Router.get('/user/:userId/:page/page', PostController.GetUserPosts)
 Router.get('/search/:search', PostController.Search)
 Router.put('/:id', AuthMiddleware, PostController.Update)
 
-Router.post(
-  '/add',
-  AuthMiddleware,
-  upload().fields([
-    { name: 'postFile', maxCount: 1 },
-    { name: 'postImage', maxCount: 1 },
-    { name: 'dependentFiles', maxCount: 10 },
-  ]),
-  PostController.Add
-)
+Router.post('/add', AuthMiddleware, PostController.Add)
 
 export default Router

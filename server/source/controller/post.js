@@ -1,4 +1,4 @@
-import { generateUniqueId, handleErrors, slugify, getFileStoredFileds } from '../common'
+import { generateUniqueId, handleErrors, slugify, getFileStoredFileds, upload } from '../common'
 import Post, { postProjection } from '../models/post'
 import Category, { categoryProjection } from '../models/category'
 import Tag, { tagProjection } from '../models/tag'
@@ -22,9 +22,24 @@ async function postUserInfo(posts) {
 
 export async function GetSlug(req, res) {
   try {
-    let posts = await Post.find({ ...defaultPostFilter, accessLink: req.params.id }, postProjection)
+    let post = await Post.findOne({ accessLink: req.params.id }, postProjection)
 
-    let data = await postUserInfo(posts)
+    let data = await postUserInfo([post])
+
+    res.status(200).send(data[0])
+  } catch (error) {
+    res.status(500).send(handleErrors(error))
+  }
+}
+
+export async function GetSlugFromProfile(req, res) {
+  try {
+    let post = await Post.findOne({ accessLink: req.params.id }, postProjection)
+
+    if (post.userId !== req.user.userId && (post.private || !post.active)) {
+      throw new Error("You can't access this post!")
+    }
+    let data = await postUserInfo([post])
 
     res.status(200).send(data[0])
   } catch (error) {
@@ -33,56 +48,42 @@ export async function GetSlug(req, res) {
 }
 
 export async function Add(req, res, next) {
-  try {
-    const { title, tags, categories } = req.body
-    const { userId } = req.user
-    const files = req.files
-    let postId = generateUniqueId()
+  let postId = generateUniqueId()
+  req.postId = postId
 
-    let dependentFiles = getFileStoredFileds(files.dependentFiles)
-    let fileId = files.postFile[0].filename
-    let postImage = files.postImage[0].filename
+  let updatePostFiles = upload(false, true).fields([
+    { name: 'postFile', maxCount: 1 },
+    { name: 'postImage', maxCount: 1 },
+  ])
 
-    // TODO: check tag names on db
-    let savedTags = await Promise.all(
-      JSON.parse(tags).map(async tagName => {
-        return await new Tag({
-          tagId: generateUniqueId(),
-          name: tagName,
-          userId: req.user.userId,
-        }).save()
-      })
-    )
-
-    // TODO: check category names on db
-    let savedCategories = await Promise.all(
-      JSON.parse(categories).map(async categoryName => {
-        return await new Category({
-          categoryId: generateUniqueId(),
-          name: categoryName,
-          userId: req.user.userId,
-        }).save()
-      })
-    )
-
-    let postData = {
-      postId,
-      userId,
-      title,
-      fileId,
-      postImage,
-      tags: savedTags,
-      categories: savedCategories,
-      dependentFiles,
-      accessLink: slugify(title),
+  updatePostFiles(req, res, async err => {
+    if (err) {
+      // A Multer error occurred when uploading.
+      res.status(200).send(handleErrors(err))
     }
+    try {
+      const { title, tags, categories } = req.body
+      const { userId } = req.user
 
-    let data = await new Post(postData).save()
+      let postData = {
+        postId,
+        userId,
+        title,
+        fileId: req.files.postFile[0].metadata.fileId,
+        postImage: req.files.postImage[0].metadata.fileId,
+        tags: JSON.parse(tags || '[]'),
+        categories: JSON.parse(categories || '[]'),
+        accessLink: slugify(title),
+      }
 
-    res.status(200).send(data)
-  } catch (error) {
-    res.status(200).send(handleErrors(error))
-  }
+      let data = await new Post(postData).save()
+
+      res.status(200).send(data)
+    } catch (error) {
+      // TODO: remove saved files
+      res.status(200).send(handleErrors(error))
+    }
+  })
 }
 
 export async function GetPage(req, res) {

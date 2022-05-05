@@ -82,6 +82,31 @@ export async function GetFile(req, res) {
   }
 }
 
+export async function GetPostFile(req, res) {
+  try {
+    let gfs = gridFsStorage()
+    let { id } = req.params
+    gfs.find({ 'metadata.fileId': id, 'metadata.postFile': true }).toArray((err, files) => {
+      if (!files[0] || files.length === 0) {
+        return res.status(200).json({
+          success: false,
+          message: 'No files available',
+        })
+      }
+
+      let filename = files[0].filename
+      if (files.length > 1) {
+        gfs.delete(files[0]._id)
+        filename = files[files.length - 1].filename
+      }
+
+      gfs.openDownloadStreamByName(filename).pipe(res)
+    })
+  } catch (error) {
+    res.status(200).send(handleErrors(error))
+  }
+}
+
 export async function DeleteFile(req, res) {
   let gfs = gridFsStorage()
 

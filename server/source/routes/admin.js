@@ -21,10 +21,12 @@ Router.get('/reply/deactive/:replyId', AuthMiddleware, AdminController.SetReplyU
 Router.get('/reply/activate/:replyId', AuthMiddleware, AdminController.SetReplyActive)
 
 Router.get('/category/', AuthMiddleware, AdminController.GetCategory)
+Router.post('/category/add', AuthMiddleware, AdminController.AddCategoty)
 Router.get('/category/deactive/:categoryId', AuthMiddleware, AdminController.SetCategoryUnactive)
 Router.get('/category/activate/:categoryId', AuthMiddleware, AdminController.SetCategoryActive)
 
 Router.get('/tag/', AuthMiddleware, AdminController.GetTags)
+Router.post('/tag/add', AuthMiddleware, AdminController.AddTag)
 Router.get('/tag/deactive/:tagId', AuthMiddleware, AdminController.SetTagUnactive)
 Router.get('/tag/activate/:tagId', AuthMiddleware, AdminController.SetTagActive)
 

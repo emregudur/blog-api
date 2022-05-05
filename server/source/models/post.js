@@ -33,14 +33,23 @@ const PostModel = new Schema(
       type: String,
       required: true,
     },
-    dependentFiles: {
-      type: Array,
-    },
     tags: {
-      type: Array,
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'tags',
+        },
+      ],
+      validate: [arrayLimit, '{PATH} exceeds the limit of 5'],
     },
     categories: {
-      type: Array,
+      type: [
+        {
+          type: Schema.Types.ObjectId,
+          ref: 'categories',
+        },
+      ],
+      validate: [arrayLimit, '{PATH} exceeds the limit of 5'],
     },
     postFileMimetype: {
       type: String,
@@ -65,9 +74,12 @@ const PostModel = new Schema(
   { timestamps: true }
 )
 
+function arrayLimit(val) {
+  return val.length <= 5
+}
+
 export const postProjection = {
   ...defaultProjection,
-  dependentFiles: false,
 }
 
 export default mongoose.model('post', PostModel)

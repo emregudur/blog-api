@@ -7,6 +7,7 @@ import * as FileController from '../controller/file'
 
 Router.post('/', AuthMiddleware, upload().single('file'), FileController.Save)
 Router.get('/:id', FileController.GetFile)
+Router.get('/post/:id', FileController.GetPostFile)
 Router.delete('/:id', AuthMiddleware, FileController.DeleteFile)
 
 export default Router

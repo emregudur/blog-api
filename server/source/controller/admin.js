@@ -233,3 +233,29 @@ export async function SetTagActive(req, res, next) {
     res.status(401).send(handleErrors(error))
   }
 }
+
+export const AddCategoty = async (req, res) => {
+  try {
+    if (!req.user.isAdmin) throw new Error('Unauthorized')
+
+    const { name } = req.body
+    await Category({ name, userId: req.user.userId }).save()
+
+    res.status(200).send({ status: true, message: 'Successful' })
+  } catch (error) {
+    res.status(401).send(handleErrors(error))
+  }
+}
+
+export const AddTag = async (req, res) => {
+  try {
+    if (!req.user.isAdmin) throw new Error('Unauthorized')
+
+    const { name } = req.body
+    await Tag({ name, userId: req.user.userId }).save()
+
+    res.status(200).send({ status: true, message: 'Successful' })
+  } catch (error) {
+    res.status(401).send(handleErrors(error))
+  }
+}

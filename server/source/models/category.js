@@ -4,8 +4,7 @@ import { defaultProjection } from '../common'
 const CategoryModel = new Schema(
   {
     categoryId: {
-      type: String,
-      required: true,
+      type: Schema.Types.ObjectId,
     },
     name: {
       type: String,

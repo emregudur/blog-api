@@ -4,8 +4,7 @@ import { defaultProjection } from '../common'
 const TagModel = new Schema(
   {
     tagId: {
-      type: String,
-      required: true,
+      type: Schema.Types.ObjectId,
     },
     name: {
       type: String,

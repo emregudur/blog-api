@@ -55,7 +55,7 @@ export const handleErrors = err => {
   return { status: false, message: "There's something wrong", errorMessage: err?.message }
 }
 
-export const upload = (profileImage = false) => {
+export const upload = (profileImage = false, postFile = false) => {
   const connect = mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   const storage = new GridFsStorage({
     db: connect,
@@ -63,7 +63,6 @@ export const upload = (profileImage = false) => {
       return new Promise((resolve, reject) => {
         crypto.randomBytes(16, (err, buf) => {
           if (err) {
-            console.log('GridFsStorage err', err)
             return reject(err)
           }
           const filename = buf.toString('hex')
@@ -74,6 +73,9 @@ export const upload = (profileImage = false) => {
             metadata: {
               userId: req.user.userId,
               profileImage,
+              postFile,
+              fileId: generateUniqueId(),
+              postId: req.postId || '',
             },
           }
           resolve(fileInfo)
