@@ -1,5 +1,5 @@
 import { defaultProjection, handleErrors } from '../common'
-import User from '../models/user'
+import User, { userProjection } from '../models/user'
 import Post from '../models/post'
 import Category from '../models/category'
 import Tag from '../models/tag'
@@ -10,12 +10,22 @@ export async function GetUsers(req, res, next) {
   try {
     if (!req.user.isAdmin) throw new Error('Unauthorized')
 
-    let users = await User.find({}, defaultProjection).sort({ _id: -1 })
+    let users = await User.find({}, userProjection).sort({ _id: -1 })
 
     res.status(200).send(users)
   } catch (error) {
     res.status(401).send(handleErrors(error))
   }
+}
+
+async function postUserInfo(posts) {
+  return await Promise.all(
+    posts.map(async x => {
+      let user = await User.findOne({ userId: x.userId }, userProjection)
+
+      return { ...x._doc, user }
+    })
+  )
 }
 
 export async function GetPosts(req, res, next) {
@@ -24,7 +34,9 @@ export async function GetPosts(req, res, next) {
 
     let posts = await Post.find({}, defaultProjection).sort({ _id: -1 })
 
-    res.status(200).send(posts)
+    let data = await postUserInfo(posts)
+
+    res.status(200).send(data)
   } catch (error) {
     res.status(401).send(handleErrors(error))
   }

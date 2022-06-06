@@ -6,12 +6,20 @@ export async function GetComments(req, res) {
   try {
     const { postId } = req.params
 
-    let comments = await Comment.find({ postId, active: true }, defaultProjection).sort({ _id: -1 })
-    let reply = await Reply.find({ postId, active: true }, defaultProjection).sort({ _id: -1 })
+    let comments = await Comment.find({ postId }, defaultProjection).sort({ _id: -1 })
+    let reply = await Reply.find({ postId }, defaultProjection).sort({ _id: -1 })
     let withReply = comments.map(comment => {
       return {
         ...comment._doc,
-        reply: reply.filter(x => x.commentId === comment.commentId),
+        text: comment.active ? comment.text : 'This comment waiting approve...',
+        reply: reply
+          .filter(x => x.commentId === comment.commentId)
+          .map(x => {
+            return {
+              ...x._doc,
+              text: x.active ? x.text : 'This reply waiting approve...',
+            }
+          }),
       }
     })
 

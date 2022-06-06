@@ -1,8 +1,9 @@
-import { generateUniqueId, handleErrors, slugify, getFileStoredFileds, upload } from '../common'
+import { generateUniqueId, handleErrors, slugify, upload } from '../common'
 import Post, { postProjection } from '../models/post'
-import Category, { categoryProjection } from '../models/category'
-import Tag, { tagProjection } from '../models/tag'
+import Category from '../models/category'
+import Tag from '../models/tag'
 import User, { userProjection } from '../models/user'
+import { defaultProjection } from '../common'
 
 const POST_LIMIT_SIZE = 4
 const defaultPostFilter = {
@@ -28,7 +29,7 @@ export async function GetSlug(req, res) {
 
     res.status(200).send(data[0])
   } catch (error) {
-    res.status(500).send(handleErrors(error))
+    res.status(200).send(handleErrors(error))
   }
 }
 
@@ -43,7 +44,7 @@ export async function GetSlugFromProfile(req, res) {
 
     res.status(200).send(data[0])
   } catch (error) {
-    res.status(500).send(handleErrors(error))
+    res.status(200).send(handleErrors(error))
   }
 }
 
@@ -71,10 +72,11 @@ export async function Add(req, res, next) {
         title,
         fileId: req.files.postFile[0].metadata.fileId,
         postImage: req.files.postImage[0].metadata.fileId,
-        tags: JSON.parse(tags || '[]'),
-        categories: JSON.parse(categories || '[]'),
+        tags: JSON.parse(tags),
+        categories: JSON.parse(categories),
         accessLink: slugify(title),
       }
+      console.log(postData)
 
       let data = await new Post(postData).save()
 
@@ -138,6 +140,30 @@ export async function Search(req, res) {
     let data = await postUserInfo(posts)
 
     res.status(200).send(data)
+  } catch (error) {
+    res.status(200).send(handleErrors(error))
+  }
+}
+
+export async function GetCategory(req, res, next) {
+  try {
+    if (!req.user) throw new Error('Unauthorized')
+
+    let category = await Category.find({}).sort({ _id: -1 })
+
+    res.status(200).send(category)
+  } catch (error) {
+    res.status(200).send(handleErrors(error))
+  }
+}
+
+export async function GetTags(req, res, next) {
+  try {
+    if (!req.user) throw new Error('Unauthorized')
+
+    let tags = await Tag.find({}).sort({ _id: -1 })
+
+    res.status(200).send(tags)
   } catch (error) {
     res.status(200).send(handleErrors(error))
   }

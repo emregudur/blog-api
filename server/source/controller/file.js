@@ -47,21 +47,13 @@ export async function FileModelSave(req) {
 }
 
 export async function Save(req, res) {
-  let check = await CheckFile(req, res)
-
-  if (check.success === false) res.status(200).json(check)
-
-  let newFile = FileModelSave(req)
-
-  newFile
-    .save()
-    .then(file => {
-      res.status(200).json({
-        success: true,
-        file,
-      })
-    })
-    .catch(err => res.status(500).json(err))
+  const { file } = req
+  res.status(200).json({
+    success: true,
+    fileId: file.metadata.fileId,
+    filename: file.originalname,
+    mimetype: file.mimetype,
+  })
 }
 
 export async function GetFile(req, res) {

@@ -52,6 +52,7 @@ export const uri = `mongodb://${process.env.MONGO_USERNAME}:${process.env.MONGO_
 
 export const handleErrors = err => {
   // TODO: save error
+  console.trace()
   return { status: false, message: "There's something wrong", errorMessage: err?.message }
 }
 
@@ -84,7 +85,9 @@ export const upload = (profileImage = false, postFile = false) => {
     },
   })
 
-  return multer({ storage })
+  var maxSize = 2 * 1024 * 1024
+
+  return multer({ storage, limits: { fileSize: maxSize } })
 }
 
 export const gridFsStorage = () => {
