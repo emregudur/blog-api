@@ -9,6 +9,7 @@ Router.get('/user/unactivate/:userId', AuthMiddleware, AdminController.SetUserUn
 Router.get('/user/activate/:userId', AuthMiddleware, AdminController.SetUserActive)
 
 Router.get('/post/', AuthMiddleware, AdminController.GetPosts)
+Router.get('/post/:id', AdminController.GetSlug)
 Router.get('/post/unactivate/:postId', AuthMiddleware, AdminController.SetPostUnactive)
 Router.get('/post/activate/:postId', AuthMiddleware, AdminController.SetPostActive)
 
@@ -16,7 +17,6 @@ Router.get('/comment/', AuthMiddleware, AdminController.GetComments)
 Router.get('/comment/unactivate/:commentId', AuthMiddleware, AdminController.SetCommentUnactive)
 Router.get('/comment/activate/:commentId', AuthMiddleware, AdminController.SetCommentActive)
 
-Router.get('/reply/', AuthMiddleware, AdminController.GetReply)
 Router.get('/reply/unactivate/:replyId', AuthMiddleware, AdminController.SetReplyUnactive)
 Router.get('/reply/activate/:replyId', AuthMiddleware, AdminController.SetReplyActive)
 

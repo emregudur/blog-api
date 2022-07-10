@@ -28,15 +28,49 @@ async function postUserInfo(posts) {
   )
 }
 
+async function getCommentsWithReply(postId) {
+  try {
+    let comments = await Comment.find({ postId }, defaultProjection).sort({ _id: -1 })
+    let reply = await Reply.find({ postId }, defaultProjection).sort({ _id: -1 })
+    let withReply = comments.map(comment => {
+      return {
+        ...comment._doc,
+        reply: reply
+          .filter(x => x.commentId === comment.commentId)
+          .map(x => {
+            return {
+              ...x._doc,
+            }
+          }),
+      }
+    })
+
+    return withReply
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+async function postCommentsInfo(posts) {
+  return await Promise.all(
+    posts.map(async x => {
+      let comments = await getCommentsWithReply(x.postId)
+
+      return { ...x, comments }
+    })
+  )
+}
+
 export async function GetPosts(req, res, next) {
   try {
     if (!req.user.isAdmin) throw new Error('Unauthorized')
 
     let posts = await Post.find({}, defaultProjection).sort({ _id: -1 })
 
-    let data = await postUserInfo(posts)
+    posts = await postUserInfo(posts)
+    posts = await postCommentsInfo(posts)
 
-    res.status(200).send(data)
+    res.status(200).send(posts)
   } catch (error) {
     res.status(401).send(handleErrors(error))
   }
@@ -66,27 +100,15 @@ export async function GetTags(req, res, next) {
   }
 }
 
-export async function GetComments(req, res, next) {
+export async function GetComments(req, res) {
   try {
     if (!req.user.isAdmin) throw new Error('Unauthorized')
 
-    let comment = await Comment.find({}, defaultProjection).sort({ _id: -1 })
+    let comments = await Comment.find({}, defaultProjection).sort({ _id: -1 })
 
-    res.status(200).send(comment)
+    res.status(200).send(comments)
   } catch (error) {
-    res.status(401).send(handleErrors(error))
-  }
-}
-
-export async function GetReply(req, res, next) {
-  try {
-    if (!req.user.isAdmin) throw new Error('Unauthorized')
-
-    let reply = await Reply.find({}, defaultProjection).sort({ _id: -1 })
-
-    res.status(200).send(reply)
-  } catch (error) {
-    res.status(401).send(handleErrors(error))
+    res.status(200).send(handleErrors(error))
   }
 }
 
@@ -269,5 +291,19 @@ export const AddTag = async (req, res) => {
     res.status(200).send({ status: true, message: 'Successful' })
   } catch (error) {
     res.status(401).send(handleErrors(error))
+  }
+}
+
+export async function GetSlug(req, res) {
+  try {
+    if (!req.user.isAdmin) throw new Error('Unauthorized')
+
+    let post = await Post.findOne({ accessLink: req.params.id })
+
+    let data = await postUserInfo([post])
+
+    res.status(200).send(data[0])
+  } catch (error) {
+    res.status(200).send(handleErrors(error))
   }
 }

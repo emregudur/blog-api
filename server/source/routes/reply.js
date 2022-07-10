@@ -2,7 +2,7 @@ import express from 'express'
 const Router = express.Router()
 
 import { Verify as AuthMiddleware } from '../middlewares/auth'
-import * as ReplyController from '../controller/Reply'
+import * as ReplyController from '../controller/reply'
 
 Router.post('/approve', AuthMiddleware, ReplyController.ApproveReply)
 Router.post('/', AuthMiddleware, ReplyController.AddReply)
