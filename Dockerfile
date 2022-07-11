@@ -1,4 +1,4 @@
-FROM 16.16.0-slim
+FROM node:16.16.0-slim
 WORKDIR /opt/blog-api
 
 COPY ./dist-server ./dist-server
