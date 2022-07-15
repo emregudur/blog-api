@@ -2,7 +2,7 @@
   "name": "emre-gudur-blogsite-api",
   "version": "1.0.0",
   "private": true,
-  "index": "./server/bin/www",
+  "index": "./dist-server/bin/www",
   "scripts": {
     "start": "npm run prod",
     "build": "npm-run-all clean transpile",

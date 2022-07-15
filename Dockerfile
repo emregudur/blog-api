@@ -1,11 +1,10 @@
 FROM node:16.16.0-slim
 WORKDIR /opt/blog-api
 
-COPY ./server ./server
-COPY ./package.json ./package.json
-COPY ./.env ./.env
+COPY . .
 
 RUN yarn install --frozen-lockfile
+
 RUN yarn build
 
 ENV NODE_ENV production
