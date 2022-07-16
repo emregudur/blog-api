@@ -8,8 +8,8 @@ RUN yarn install --frozen-lockfile
 RUN yarn build
 
 ENV NODE_ENV production
-ENV PORT 3010
+ENV PORT 3040
 
-EXPOSE 3010
+EXPOSE 3040
 
 CMD ["yarn", "server"]
