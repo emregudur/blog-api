@@ -12,9 +12,11 @@ export async function GetToken(req, res, next) {
     }
 
     if (user.password !== encrypPassword(password)) {
-      throw new Error('Auth failed, email or password wrong')
+      res.status(200).send(handleErrors('Auth failed, email or password wrong'))
+      // throw new Error('Auth failed, email or password wrong', 123)
     } else if (user.active === false) {
-      throw new Error('Auth failed, user not active')
+      res.status(200).send(handleErrors('Auth failed, user not active'))
+      // throw new Error('Auth failed, user not active')
     } else {
       let payload = {
         ...user._doc,
