@@ -1,14 +1,14 @@
 import jwt from 'jsonwebtoken'
 import { encrypPassword, handleErrors } from '../common'
-import User, { userProjection } from '../models/user'
+import User from '../models/user'
 
 export async function GetToken(req, res, next) {
-  const { email, password } = req.body
   try {
+    const { email, password } = req.body
     let user = await User.findOne({ email })
 
     if (!user) {
-      throw new Error('Auth failed, user not found')
+      res.status(200).send(handleErrors('Auth failed, user not found'))
     }
 
     if (user.password !== encrypPassword(password)) {
@@ -33,6 +33,6 @@ export async function GetToken(req, res, next) {
       res.json({ status: true, token })
     }
   } catch (error) {
-    res.status(401).send(handleErrors(error))
+    res.status(200).send(handleErrors(error))
   }
 }

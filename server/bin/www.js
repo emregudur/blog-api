@@ -14,6 +14,7 @@ var debug = debugLib('api:server')
  */
 
 var port = normalizePort(process.env.PORT || '3000')
+console.log(port)
 app.set('port', port)
 
 /**
