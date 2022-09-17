@@ -1,6 +1,6 @@
-## Setup
+# Setup
 
-### 1. Installation
+### Installation
 
 ```jsx
 yarn install 
@@ -9,20 +9,20 @@ yarn install
 npm install
 ```
 
-# development
+### development
 
 ```jsx
 yarn watch:dev
 ```
 
-# production
+### production
 
 ```
 yarn prod
 ```
 
 
-## env file
+### env file
 ```jsx
 MONGO_INITDB_ROOT_USERNAME=root
 MONGO_INITDB_ROOT_PASSWORD='<SECRET>'
@@ -38,7 +38,7 @@ PORT=3040
 
 # Docker
 
-## Docker compose
+### Docker compose
 
 ```diff
 version: "3.4"
@@ -90,10 +90,14 @@ version: "3.4"
 +    driver: bridge
 ```
 
-## docker compose build and run
+### docker compose build and run
 
 ```jsx
 docker-compose up -d blogdb &&
 docker-compose build blogapi &&
 docker-compose up -d blogapi
 ```
+# Todo
+
+- [ ] mailing (nodemailer)
+- [ ] password refresh/forget password services
